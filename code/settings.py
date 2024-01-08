@@ -1,4 +1,5 @@
 from pandas import read_csv as pd_read_csv, concat as pd_concat, isnull as pd_isnull, Index as pd_Index, DataFrame as pd_DataFrame, ExcelWriter as pd_ExcelWriter, Series as pd_Series
+
 from os import path as os_path
 from numpy import any as np_any, prod as np_prod, array as np_array, NaN as np_NaN, argwhere as np_argwhere, where as np_where
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
@@ -9,7 +10,7 @@ from copy import deepcopy as copy_deepcopy
 from datetime import datetime
 
 
-#online excell files
+#inline excell files
 orig_url = 'https://github.com/FernandoCF7/denatbioRegistroPacientes/blob/main/'
 
 color_by_day = {
@@ -19,7 +20,7 @@ color_by_day = {
     3: "GRIS",#thursday
     4: "VERDE",#friday
     5: "BLANCO",#saturday
-    6: "AZUL",#sunday
+    6: "AZUL"#sunday
 }
 
 #-----------------------------------------------------------------------------#
@@ -37,43 +38,38 @@ def set_projectmodule_parameters(currentPath, inlineEF):
 
     #read codeEnterprise file
     set_codeEnterpriseFile(currentPath, inlineEF)
-
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
 #read registro file
 def get_csvFile(currentPath, yymmddPath):
     
-    filePath_registro = os_path.join("{0}","..","..","DB_ingresoPorVoz","{1}.txt").format(
-        currentPath,yymmddPath)
+    filePath_registro = os_path.join("{0}", "DB_ingresoPorVoz", "{1}.txt").format(currentPath, yymmddPath)
 
     csvFile = (pd_read_csv(filePath_registro,sep='*', dtype={2: str}))
 
-    csvFile.columns = ["firstName","secondName",'thirdName']
+    csvFile.columns = ["firstName", "secondName", 'thirdName']
 
     #set as upper
-    csvFile["firstName"]=csvFile["firstName"].str.upper()
-    csvFile["secondName"]=csvFile["secondName"].str.upper()
+    csvFile["firstName"] = csvFile["firstName"].str.upper()
+    csvFile["secondName"] = csvFile["secondName"].str.upper()
 
-    #quit blank's begin and end
+    #remove spaces at the begining and end of the string
     csvFile["firstName"] = csvFile["firstName"].str.strip()
     csvFile["secondName"] = csvFile["secondName"].str.strip()
     csvFile["thirdName"] = csvFile["thirdName"].str.strip()
     
-
-    #enmascarar las Ñ´s con @@´s
-    for idx, val in enumerate(csvFile["firstName"]):
-        csvFile["firstName"][idx] = csvFile["firstName"][idx].replace("Ñ","@@")
-        csvFile["secondName"][idx] = csvFile["secondName"][idx].replace("Ñ","@@")
+    #mask Ñ's with @@'s
+    for idx, _ in enumerate(csvFile["firstName"]):
+        csvFile["firstName"][idx] = csvFile["firstName"][idx].replace("Ñ", "@@")
+        csvFile["secondName"][idx] = csvFile["secondName"][idx].replace("Ñ", "@@")
     
-    #set without acents
-    csvFile["firstName"] = csvFile["firstName"].str.normalize('NFKD').str.encode(
-        'ascii', errors='ignore').str.decode('utf-8')
-    csvFile["secondName"] = csvFile["secondName"].str.normalize('NFKD').str.encode(
-        'ascii', errors='ignore').str.decode('utf-8')
+    #remove acents
+    csvFile["firstName"] = csvFile["firstName"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+    csvFile["secondName"] = csvFile["secondName"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
-    #re-establecer las @@´s como Ñ´s
-    for idx, val in enumerate(csvFile["firstName"]):
+    #restore @@'s with Ñ's
+    for idx, _ in enumerate(csvFile["firstName"]):
         csvFile["firstName"][idx] = csvFile["firstName"][idx].replace("@@","Ñ")
         csvFile["secondName"][idx] = csvFile["secondName"][idx].replace("@@","Ñ")
     
@@ -89,18 +85,16 @@ def set_pd_listExam(currentPath, inlineEF):
     if inlineEF:
         filePath_listExam = ("{0}"+"listadoDeExamenes/listExam.csv?raw=true").format(orig_url)
     else:
-        filePath_listExam = os_path.join("{0}","..","listadoDeExamenes",
-                                    "listExam.csv").format(currentPath)
+        filePath_listExam = os_path.join("{0}", "..", "listadoDeExamenes", "listExam.csv").format(currentPath)
 
-    pd_listExam = (pd_read_csv(filePath_listExam, usecols=["COD INT","EXAMEN"]))
+    pd_listExam = (pd_read_csv(filePath_listExam, usecols=["COD INT", "EXAMEN"]))
 
     #set index of pd_listExam as COD INT column
     pd_listExam.set_index("COD INT", inplace=True)
 
-
     #read listExam locally file
-    filePath_listExam_tmp = os_path.join("{}","..","..","altas","listExam.csv").format(currentPath)
-    listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["COD INT","EXAMEN"])
+    filePath_listExam_tmp = os_path.join("{}", "altas", "listExam.csv").format(currentPath)
+    listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["COD INT", "EXAMEN"])
 
     listExam_locally.set_index("COD INT", inplace=True)
 
@@ -120,9 +114,8 @@ def set_df_enterpriseNames(currentPath, inlineEF):
 
     if inlineEF:
         filePath_clavesNombresEmpresa = ("{0}"+"empresas/clavesNombresEmpresa.csv?raw=true").format(orig_url)
-        
     else:
-        filePath_clavesNombresEmpresa = os_path.join("{0}","..","empresas", "clavesNombresEmpresa.csv").format(currentPath)
+        filePath_clavesNombresEmpresa = os_path.join("{0}", "..", "empresas", "clavesNombresEmpresa.csv").format(currentPath)
 
     df_enterpriseNames = pd_read_csv(filePath_clavesNombresEmpresa, keep_default_na=False)
 
@@ -130,7 +123,7 @@ def set_df_enterpriseNames(currentPath, inlineEF):
     df_enterpriseNames.set_index("clave", inplace=True)
 
     #read clavesNombresEmpresa locally file
-    filePath_clavesNombresEmpresa_tmp = os_path.join("{}","..","..","altas","clavesNombresEmpresa.csv").format(currentPath)
+    filePath_clavesNombresEmpresa_tmp = os_path.join("{}", "altas", "clavesNombresEmpresa.csv").format(currentPath)
     clavesNombresEmpresa_locally = pd_read_csv(filePath_clavesNombresEmpresa_tmp, encoding='latin-1', keep_default_na=False)
 
     clavesNombresEmpresa_locally.set_index("clave", inplace=True)
@@ -148,21 +141,18 @@ def set_pd_listSurrogate(currentPath, inlineEF):
     if inlineEF:
         filePath_list = ("{0}"+"surrogate/surrogateList.csv?raw=true").format(orig_url)
     else:
-        filePath_list = os_path.join("{0}","..","surrogate",
-                                    "surrogateList.csv").format(currentPath)
+        filePath_list = os_path.join("{0}", "..", "surrogate", "surrogateList.csv").format(currentPath)
 
-    pd_listSurrogate = (pd_read_csv(filePath_list, usecols=["CODIGO","NOMBRE"]))
+    pd_listSurrogate = (pd_read_csv(filePath_list, usecols=["CODIGO", "NOMBRE"]))
 
     #set index of pd_listSurrogate as CODE column
     pd_listSurrogate.set_index("CODIGO", inplace=True)
 
-
     #read pd_listSurrogate locally file
-    filePath_list_tmp = os_path.join("{}","..","..","altas","surrogateList.csv").format(currentPath)
-    list_locally = pd_read_csv(filePath_list_tmp, usecols=["CODIGO","NOMBRE"])
+    filePath_list_tmp = os_path.join("{}", "altas", "surrogateList.csv").format(currentPath)
+    list_locally = pd_read_csv(filePath_list_tmp, usecols=["CODIGO", "NOMBRE"])
 
     list_locally.set_index("CODIGO", inplace=True)
-
     
     #check no repeated surrogate of list_locally
     for idx, row in list_locally.iterrows():
@@ -178,8 +168,6 @@ def set_pd_listSurrogate(currentPath, inlineEF):
     #append
     pd_listSurrogate = pd_concat([pd_listSurrogate, list_locally])
 #-----------------------------------------------------------------------------#
-
-
 
 #-----------------------------------------------------------------------------#
 #search for enterprise; extract index of the enterprises
@@ -198,12 +186,12 @@ def get_idx_enterprise(csvFile_firstName):
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#check fill values in all patients entries
+#validate that all patients values are filled
 def checkFilledfiels(columnIdx, csvFile, idx_patients, day):
     
-    if np_any(pd_isnull(csvFile.iloc[idx_patients,columnIdx])) or np_any(csvFile.iloc[idx_patients,columnIdx]==""):
+    if np_any(pd_isnull(csvFile.iloc[idx_patients, columnIdx])) or np_any(csvFile.iloc[idx_patients, columnIdx]==""):
         
-        tmp = np_where(pd_isnull(csvFile.iloc[idx_patients,columnIdx]))
+        tmp = np_where(pd_isnull(csvFile.iloc[idx_patients, columnIdx]))
         
         if not(np_any(tmp)):
             tmp = np_where(csvFile.iloc[idx_patients,columnIdx]=="")
@@ -265,15 +253,15 @@ def get_enterpriseNames_exclusiveExcel(exel_enterprises, day):
         #set as upper
         enterprise_name = enterprise_name_.upper()
     
-        #enmascarar las Ñ´s con @@´s
-        enterprise_name = enterprise_name.replace("Ñ","@@")
+        #mask Ñ's with @@'s
+        enterprise_name = enterprise_name.replace("Ñ", "@@")
         
-        #set without acents
+        #remove acents
         enterprise_name = unicodedata_normalize('NFKD', enterprise_name)
         enterprise_name = enterprise_name.encode('ascii', errors='ignore').decode('utf-8')
 
-        #re-establecer las @@´s como Ñ´s
-        enterprise_name = enterprise_name.replace("@@","Ñ")
+        #restore @@'s with Ñ's
+        enterprise_name = enterprise_name.replace("@@", "Ñ")
         
         #search enterprise_name in codeEnterpriseFile
         logicTMP = enterprise_name == codeEnterpriseFile['empresa'].str.upper()
@@ -311,34 +299,26 @@ def set_codeEnterpriseFile(currentPath, inlineEF):
     if inlineEF:
         filePath_codeEnterprise = ("{0}"+"empresas/codeEnterprise.csv?raw=true").format(orig_url)
     else:
-        filePath_codeEnterprise = os_path.join("{0}","..","empresas",
-                                        "codeEnterprise.csv").format(currentPath)
+        filePath_codeEnterprise = os_path.join("{0}", "..", "empresas", "codeEnterprise.csv").format(currentPath)
 
-    codeEnterpriseFile = pd_read_csv(filePath_codeEnterprise, encoding='latin-1',
-                                keep_default_na=False)
+    codeEnterpriseFile = pd_read_csv(filePath_codeEnterprise, encoding='latin-1', keep_default_na=False)
 
     #set as upper
-    codeEnterpriseFile["empresa"]=codeEnterpriseFile["empresa"].str.upper()
+    codeEnterpriseFile["empresa"] = codeEnterpriseFile["empresa"].str.upper()
 
-    #set without acents
-    codeEnterpriseFile["empresa"]=codeEnterpriseFile[
-        "empresa"].str.normalize('NFKD').str.encode('ascii',
-                                            errors='ignore').str.decode('utf-8')
+    #remove acents
+    codeEnterpriseFile["empresa"] = codeEnterpriseFile["empresa"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
     #read codeEnterprise locally file
-    filePath_codeEnterprise_tmp = os_path.join("{}","..","..","altas","codeEnterprise.csv").format(currentPath)
+    filePath_codeEnterprise_tmp = os_path.join("{}", "altas", "codeEnterprise.csv").format(currentPath)
 
-
-    codeEnterpriseFile_locally = pd_read_csv(filePath_codeEnterprise_tmp, encoding='latin-1',
-                                keep_default_na=False)
+    codeEnterpriseFile_locally = pd_read_csv(filePath_codeEnterprise_tmp, encoding='latin-1', keep_default_na=False)
 
     #set as upper
     codeEnterpriseFile_locally["empresa"] = codeEnterpriseFile_locally["empresa"].str.upper()
 
-    #set without acents
-    codeEnterpriseFile_locally["empresa"]=codeEnterpriseFile_locally[
-        "empresa"].str.normalize('NFKD').str.encode('ascii',
-                                            errors='ignore').str.decode('utf-8')
+    #remove acents
+    codeEnterpriseFile_locally["empresa"]=codeEnterpriseFile_locally["empresa"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
     #Concatenated codeEnterpriseFile and codeEnterpriseFile_locally
     codeEnterpriseFile = pd_concat([codeEnterpriseFile, codeEnterpriseFile_locally], axis=0)
@@ -351,15 +331,15 @@ def get_listEnterpriseNameByPatient(idx_enterprise, enterpriseNames, idx_patient
     listEnterpriseNameByPatient = []
     
     for idx, val in enumerate(idx_enterprise[:-1]):
-        for val0 in range(val,idx_enterprise[idx+1]):
+        for _ in range(val, idx_enterprise[idx+1]):
             listEnterpriseNameByPatient.append(enterpriseNames[idx])
     else:
         if len(idx_enterprise)==1: idx=-1
-        for val0 in range(idx_enterprise[idx+1], len_csvFile):
+        for _ in range(idx_enterprise[idx+1], len_csvFile):
             listEnterpriseNameByPatient.append(enterpriseNames[idx+1])       
 
-    #Convert listEnterpriseNameByPatient from list to dict
-    tmp=dict()
+    #listEnterpriseNameByPatient --> convert list to dict
+    tmp = dict()
     for val in idx_patients:
         tmp[val] = listEnterpriseNameByPatient[val]
 
@@ -373,18 +353,18 @@ def get_listEnterpriseCodeByPatient(idx_enterprise, enterpriseCodecs, idx_patien
     listEnterpriseCodeByPatient = []
     
     for idx, val in enumerate(idx_enterprise[:-1]):
-        for val0 in range(val,idx_enterprise[idx+1]):
+        for _ in range(val, idx_enterprise[idx+1]):
             listEnterpriseCodeByPatient.append(enterpriseCodecs[idx])
     else:
         try:
-            for val0 in range(idx_enterprise[idx+1], len_csvFile):
+            for _ in range(idx_enterprise[idx+1], len_csvFile):
                 listEnterpriseCodeByPatient.append(enterpriseCodecs[idx+1])
         except:
             if idx_enterprise:
-                for val0 in range(0, len(idx_patients)+1):
+                for _ in range(0, len(idx_patients)+1):
                     listEnterpriseCodeByPatient.append(enterpriseCodecs[0])
 
-    #Convert listEnterpriseNameByPatient from list to dict
+    #listEnterpriseNameByPatient --> convert list to dict
     tmp = dict()
     for val in idx_patients:
         tmp[val] = listEnterpriseCodeByPatient[val]
@@ -425,22 +405,19 @@ def get_listShiftByPatient(idx_enterprise, idx_patients, shift, len_csvFile):
     listShiftByPatient = []
     
     for idx, val in enumerate(idx_enterprise[:-1]):
-        for val0 in range(val,idx_enterprise[idx+1]):
+        for _ in range(val, idx_enterprise[idx+1]):
             listShiftByPatient.append(shift[idx])
     else:
 
         try:
-            for val0 in range(idx_enterprise[idx+1], len_csvFile):
+            for _ in range(idx_enterprise[idx+1], len_csvFile):
                 listShiftByPatient.append(shift[idx+1])
         except:
             if idx_enterprise:
-                for val0 in range(0, len(idx_patients)+1):
+                for _ in range(0, len(idx_patients)+1):
                     listShiftByPatient.append(shift[0])
 
-
-                
-
-    #Convert listEnterpriseNameByPatient from list to dict
+    #listEnterpriseNameByPatient --> convert list to dict
     tmp = dict()
     for val in idx_patients:
         tmp[val] = listShiftByPatient[val]
@@ -449,7 +426,7 @@ def get_listShiftByPatient(idx_enterprise, idx_patients, shift, len_csvFile):
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#search for urgents examns
+#search for 'urgents' examns
 def get_idx_urgentes(idx_patients, csvFile):
 
     patern_urgente = re_compile(r'URGENTE', flags=re_IGNORECASE)#'URGENTE' pattern
@@ -458,9 +435,10 @@ def get_idx_urgentes(idx_patients, csvFile):
 
     for val in idx_patients:#search for each patient
         
-        #patient name
+        #csvFile.firstName --> patient name
         patientName = csvFile.firstName[val]
-        if patientName.find("URGENTE")!=-1:#search 'URGENTE' in patient
+
+        if patientName.find("URGENTE")!=-1:#finded 'URGENTE' inside the patient name
             idx_urgentes.append(val)
     
     return idx_urgentes
@@ -476,25 +454,27 @@ def get_idx_vuelo(idx_patients, csvFile):
 
     for val in idx_patients:#search for each patient
         
-        #patient name
+        #csvFile.firstName --> patient name
         patientName = csvFile.firstName[val]
-        if patientName.find("VUELO")!=-1:#search 'VUELO' in patient
+        if patientName.find("VUELO")!=-1:#finded 'VUELO' in the patient name
             idx_vuelo.append(val)
 
     return idx_vuelo
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#update csvFile.firstName cuting the "urgente" part
+#csvFile.firstName --> cut the 'VUELO' part
 def update_csvFile_firstName_vuelo(idx_vuelo, csvFile):
 
     patern_vuelo = re_compile(r'VUELO', flags=re_IGNORECASE)#'VUELO' pattern
     
     for val in idx_vuelo:
         
+        #csvFile.firstName --> patient name
         patientName = csvFile.firstName[val]
+
         tmp = patern_vuelo.search(patientName)
-        csvFile.firstName[val]=patientName[0:tmp.start()]+patientName[tmp.end():]
+        csvFile.firstName[val] = patientName[0:tmp.start()]+patientName[tmp.end():]
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
@@ -543,12 +523,10 @@ def get_ECBP(idx_patients, csvFile):
         ECBP[val] = tmp_
     
     return ECBP
-
-    
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#update csvFile.firstName cuting the "urgente" part
+#update csvFile.firstName cuting the 'URGENTE' part
 def update_csvFile_firstName_urgent(idx_urgentes, csvFile):
 
     patern_urgente = re_compile(r'URGENTE', flags=re_IGNORECASE)#'URGENTE' pattern
@@ -556,6 +534,7 @@ def update_csvFile_firstName_urgent(idx_urgentes, csvFile):
     for val in idx_urgentes:
         
         patientName = csvFile.firstName[val]
+
         tmp = patern_urgente.search(patientName)
         csvFile.firstName[val] = patientName[0:tmp.start()]+patientName[tmp.end():]
 #-----------------------------------------------------------------------------#
@@ -589,44 +568,50 @@ def get_EPCBP(ECBP):
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#set color set as each study
+#set each study kind with a color
 def get_color_as_study(ECBP):
 
     #ECBNC --> Exam color by no PCR covits
     ECBNC = dict()
     for idx, val in ECBP.items():
         if any(np_array(list(val.keys()))!=2):
-            ECBNC[idx]=True
+            ECBNC[idx] = True
 
     #ECBAC --> Exam color by antigen covit
     ECBAC = dict()
     for idx, val in ECBP.items():
-        if any(np_array(list(val.keys()))==487):
-            ECBAC[idx]=True
+        if any(np_array(list(val.keys())) == 487):
+            ECBAC[idx] = True
 
     #ECBABC --> Exam color by anti body covit
     ECBABC = dict()
     for idx, val in ECBP.items():
-        if any(np_array(list(val.keys()))==491):
-            ECBABC[idx]=True
+        if any(np_array(list(val.keys())) == 491):
+            ECBABC[idx] = True
 
     #ECBCABC --> Exam color by cuantitative anti body covit
     ECBCABC = dict()
     for idx, val in ECBP.items():
-        if any(np_array(list(val.keys()))==569):
-            ECBCABC[idx]=True
+        if any(np_array(list(val.keys())) == 569):
+            ECBCABC[idx] = True
 
     #ECBSP --> Exam color by sars plus
     ECBSP = dict()
     for idx, val in ECBP.items():
-        if any(np_array(list(val.keys()))==1009):
-            ECBSP[idx]=True
+        if any(np_array(list(val.keys())) == 1009):
+            ECBSP[idx] = True
         
     return ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP
 #-----------------------------------------------------------------------------#
 
+
+
+
+
+
+
 #-----------------------------------------------------------------------------#
-#set the exams name, 
+#set the exams name 
 def get_examNameList(idx_patients, csvFile, ECBP, format_, day):
 
     examNameList = dict()
@@ -824,7 +809,7 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}","..","..","listadosGeneradosParaExel","{1}",
+    pathTosave = os_path.join("{0}","listadosGeneradosParaExel","{1}",
                             "{2}{3}.xlsx").format(currentPath,
                                         yymmddPath,day,path_)
 
@@ -1096,7 +1081,7 @@ def make_no_covid_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, cur
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}","..","..","listadosGeneradosParaExel","{1}",
+    pathTosave = os_path.join("{0}","listadosGeneradosParaExel","{1}",
                             "{2}{3}.xlsx").format(currentPath,
                                         yymmddPath,day,path_)
 
@@ -1454,3 +1439,298 @@ CEND='''OPERACION FALLIDA (fecha: {}):\nCódigo de examen no definido; paciente:
 NAS="""OPERACION FALLIDA (fecha: {})\nTurno no asignado a la OSR {}; asigne turno \
 MATUTINO/VESPERTINO"""
 #-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+
+
+#-----------------------------------------------------------------------------#
+#local variables
+currentPath = os_path.dirname(os_path.abspath(__file__))
+#-----------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------#
+#get parameters from make_excel_file.py
+def set_daily_parameters(day, exel_enterprises, subsidiary, inlineEF):
+    
+    global idx_patients, idx_enterprise, idx_patients_antigenCovit, idx_patients_antibodyCovit, codeIntCob, yymmddPath, codeIntLab, csvFile, ECBP, ECBP_str, idx_urgentes, idx_vuelo, examNameList, examNameList_nested, day_
+    global ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, idx_patients_noCovits, idx_enterprise_patients_noCovits, listEnterpriseNameByPatient, idx_patients_enterprise_forExclusiveExcel_asDict, idx_enterprise_enterprise_forExclusiveExcel_asDict
+    global enterpriseNames_forExclusiveExcel, enterpriseCodecs_forExclusiveExcel
+
+    day_ = day
+
+    #set parameters to projectmodule
+    set_projectmodule_parameters(currentPath, inlineEF)
+
+    #day, month and year
+    dayy = day[0:2]
+    month = day[2:4]
+    year = day[4:6]
+    
+    #date as save file format
+    yymmddPath = os_path.join('____'+year,'__'+month+year,day)
+
+    #read csv patients file
+    csvFile = get_csvFile(currentPath, yymmddPath)
+
+    #search for enterprise; extract index of the enterprises
+    idx_enterprise = get_idx_enterprise(csvFile["firstName"])
+
+    #search for patients; extract index of the patients
+    idx_patients = csvFile.index[~csvFile.index.isin(idx_enterprise)]
+
+    #get the OSR code --> orden de servicio de referencia
+    OSR = dict(csvFile["secondName"][idx_enterprise].str.strip())
+
+    #-----------------------------------------------------------------------------#
+    #check fill values in all patients entries
+    checkFilledfiels(0, csvFile, idx_patients, day)
+    checkFilledfiels(1, csvFile, idx_patients, day)
+    checkFilledfiels(2, csvFile, idx_patients, day)
+    #-----------------------------------------------------------------------------#
+
+    #get enterprise names and codecs
+    enterpriseNames, enterpriseCodecs = get_enterpriseNames(OSR, csvFile, idx_enterprise, day)
+
+    #get the enterprise names and codecs forExclusiveExcel
+    enterpriseNames_forExclusiveExcel, enterpriseCodecs_forExclusiveExcel = get_enterpriseNames_exclusiveExcel(exel_enterprises, day)
+
+    #set idx_enterprise and enterpriseNames as dict
+    enterpriseNames_asDict = dict(zip(idx_enterprise, enterpriseNames))
+
+    #set the enterprise name by patient
+    listEnterpriseNameByPatient = get_listEnterpriseNameByPatient(idx_enterprise, enterpriseNames, idx_patients, len(csvFile))
+
+    #set the enterprise code by patient
+    listEnterpriseCodeByPatient = get_listEnterpriseCodeByPatient(idx_enterprise, enterpriseCodecs, idx_patients, len(csvFile))
+
+    #get shift (turno)
+    shift = get_shift(idx_enterprise, csvFile, OSR, day)
+
+    #set the enterprise code by patient
+    listShiftByPatient = get_listShiftByPatient(idx_enterprise, idx_patients, shift, len(csvFile))
+
+    #search for urgents examns
+    idx_urgentes = get_idx_urgentes(idx_patients, csvFile)
+
+    #update csvFile.firstName cuting the "urgente" part
+    update_csvFile_firstName_urgent(idx_urgentes, csvFile)
+
+    #search for vuelo examns
+    idx_vuelo = get_idx_vuelo(idx_patients, csvFile)
+
+    #update csvFile.firstName cuting the "vuelo" part
+    update_csvFile_firstName_vuelo(idx_vuelo, csvFile)
+
+    #get the exam code by patient as dictionary
+    ECBP = get_ECBP(idx_patients, csvFile)
+
+    #set ECBP as list of str´s
+    ECBP_str = get_ECBP_str(ECBP)
+
+    #examn product code by patient
+    EPCBP = get_EPCBP(ECBP)
+
+    #-----------------------------------------------------------------------------#
+    #set color as each study
+    #ECBNC --> Exam color by no PCR covits
+    #ECBAC --> Exam color by antigen covit
+    #ECBABC --> Exam color by anti body covit
+    #ECBCABC --> Exam color by cuantitative anti body covit
+    #ECBSP --> Exam color by sars plus
+    ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP = get_color_as_study(ECBP)
+    #-----------------------------------------------------------------------------#
+
+    #set the exams name
+    examNameList = get_examNameList(idx_patients, csvFile, ECBP, "as_str", day)
+
+    #set the exams name nested list
+    examNameList_nested = get_examNameList(idx_patients, csvFile, ECBP, "as_list", day)
+
+    #make inter code
+    codeIntLab, codeIntCob = get_codeInt_Lab_Cob(idx_patients, idx_urgentes, day, subsidiary, ECBP, listEnterpriseCodeByPatient, listShiftByPatient, EPCBP)
+    
+    #asociate, as dict, each patient with its corresponding enterprise
+    dict_pattient_enterprise = get_dict_pattient_enterprise(idx_patients, idx_enterprise)
+    
+    #get the index's of no covit patients
+    idx_patients_noCovits, idx_enterprise_patients_noCovits = get_idx_noCovits(idx_patients, ECBP, dict_pattient_enterprise)
+    
+    #index's for antigen patients
+    idx_patients_antigenCovit, idx_enterprise_patients_antigenCovit = get_idx_antigenCovit(idx_patients, ECBP, dict_pattient_enterprise)
+    
+    #index's for antibody patients
+    idx_patients_antibodyCovit, idx_enterprise_patients_antibodyCovit = get_idx_antibodyCovit(idx_patients, ECBP, dict_pattient_enterprise)
+    
+    #get the index's of list_enterprise_forExclusiveExcel patients
+    idx_patients_enterprise_forExclusiveExcel_asDict, idx_enterprise_enterprise_forExclusiveExcel_asDict = get_idx_enterpriseExclusive(enterpriseCodecs_forExclusiveExcel, idx_patients, listEnterpriseCodeByPatient, dict_pattient_enterprise)
+#-----------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------#
+def join_month_parameters(dummy_counter):
+
+    if dummy_counter == 0:
+
+        #_m --> mounth
+        global idx_patients_m, idx_enterprise_m, idx_enterprise_patients_noCovits_m
+        global codeIntLab_m, csvFile_m, ECBP_str_m, idx_urgentes_m, idx_vuelo_m
+        global examNameList_m, examNameList_nested_m, ECBP_m, enterpriseNames_asDict_m
+        global ECBNC_m, ECBAC_m, ECBABC_m, ECBCABC_m, ECBSP_m
+        global codeIntCob_m, listEnterpriseNameByPatient_m
+        global day_list_m, day_list_antigenCovit_m, day_list_antibodyCovit_m
+        global idx_patients_antigenCovit_m, idx_patients_antibodyCovit_m, idx_patients_noCovits_m
+        global idx_patients_enterprise_forExclusiveExcel_asDict_m, idx_enterprise_enterprise_forExclusiveExcel_asDict_m, day_list_enterprises_excel_m
+
+        idx_patients_m = pd_Index(data=[])
+        idx_patients_antigenCovit_m = pd_Index(data=[])
+        idx_patients_antibodyCovit_m = pd_Index(data=[])
+        idx_patients_noCovits_m = pd_Index(data=[])
+        idx_enterprise_m = []
+        idx_enterprise_patients_noCovits_m = []
+        codeIntLab_m = {}
+        csvFile_m = pd_DataFrame()
+        ECBP_str_m = {}
+        idx_urgentes_m = []
+        idx_vuelo_m = []
+        examNameList_m = {}
+        examNameList_nested_m = {}
+        ECBP_m = {}
+        ECBNC_m = {}
+        ECBAC_m = {}
+        ECBABC_m = {}
+        ECBCABC_m = {}
+        ECBSP_m = {}
+        enterpriseNames_asDict_m = {}
+        codeIntCob_m = {}
+        listEnterpriseNameByPatient_m = {}
+        day_list_m = {}
+        day_list_antigenCovit_m = {}
+        day_list_antibodyCovit_m = {}
+        idx_patients_enterprise_forExclusiveExcel_asDict_m, idx_enterprise_enterprise_forExclusiveExcel_asDict_m = get_idx_enterpriseExclusive(enterpriseCodecs_forExclusiveExcel, pd_Index(data=[]), {}, {})
+        day_list_enterprises_excel_m = {x:{} for x in enterpriseCodecs_forExclusiveExcel}
+    
+    for key, value in idx_enterprise_enterprise_forExclusiveExcel_asDict.items():
+        idx_enterprise_enterprise_forExclusiveExcel_asDict_m[key] += [tmp+dummy_counter for tmp in value]
+    
+    for key, value in idx_patients_enterprise_forExclusiveExcel_asDict.items():
+        idx_patients_enterprise_forExclusiveExcel_asDict_m[key] = (idx_patients_enterprise_forExclusiveExcel_asDict_m[key]).union(value + dummy_counter) 
+    
+    idx_patients_m = idx_patients_m.union(idx_patients+dummy_counter)
+    idx_patients_antigenCovit_m = idx_patients_antigenCovit_m.union(idx_patients_antigenCovit+dummy_counter)
+    idx_patients_antibodyCovit_m = idx_patients_antibodyCovit_m.union(idx_patients_antibodyCovit+dummy_counter)
+    idx_patients_noCovits_m = idx_patients_noCovits_m.union(idx_patients_noCovits+dummy_counter)
+    idx_enterprise_m.extend([tmp+dummy_counter for tmp in idx_enterprise])
+    idx_enterprise_patients_noCovits_m.extend([tmp+dummy_counter for tmp in idx_enterprise_patients_noCovits])
+    idx_urgentes_m.extend([tmp+dummy_counter for tmp in idx_urgentes])
+    idx_vuelo_m.extend([tmp+dummy_counter for tmp in idx_vuelo])
+
+    tmp = {x:day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6] for x in idx_patients}
+    for key, value in tmp.items():
+        day_list_m[key+dummy_counter] = value
+
+    tmp = {x:day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6] for x in idx_patients_antigenCovit}
+    for key, value in tmp.items():
+        day_list_antigenCovit_m[key+dummy_counter] = value
+    
+    tmp = {x:day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6] for x in idx_patients_antibodyCovit}
+    for key, value in tmp.items():
+        day_list_antibodyCovit_m[key+dummy_counter] = value
+
+    for key, value in idx_patients_enterprise_forExclusiveExcel_asDict.items():
+
+        tmp = {x:day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6] for x in value}
+        for key1, value1 in tmp.items():
+            day_list_enterprises_excel_m[key][key1+dummy_counter] = value1
+
+    for key, value in codeIntLab.items():
+        codeIntLab_m[key+dummy_counter] = value
+
+    for key, value in ECBP_str.items():
+        ECBP_str_m[key+dummy_counter] = value
+    
+    for key, value in examNameList.items():
+        examNameList_m[key+dummy_counter] = value
+
+    for key, value in examNameList_nested.items():
+        examNameList_nested_m[key+dummy_counter] = value
+
+    for key, value in ECBP.items():
+        ECBP_m[key+dummy_counter] = value
+
+    for key, value in ECBNC.items():
+        ECBNC_m[key+dummy_counter] = value
+    
+    for key, value in ECBAC.items():
+        ECBAC_m[key+dummy_counter] = value
+    
+    for key, value in ECBABC.items():
+        ECBABC_m[key+dummy_counter] = value
+    
+    for key, value in ECBCABC.items():
+        ECBCABC_m[key+dummy_counter] = value
+    
+    for key, value in ECBSP.items():
+        ECBSP_m[key+dummy_counter] = value
+    
+    for key, value in enterpriseNames_asDict.items():
+        enterpriseNames_asDict_m[key+dummy_counter] = value
+
+    for key, value in codeIntCob.items():
+        codeIntCob_m[key+dummy_counter] = value
+
+    for key, value in listEnterpriseNameByPatient.items():
+        listEnterpriseNameByPatient_m[key+dummy_counter] = value
+    
+    csvFile_m = pd_concat([ csvFile_m, csvFile.set_index(csvFile.index+dummy_counter) ])
+#-----------------------------------------------------------------------------#
+
+def antigen_excel():
+    make_excel_antigen_antibody(idx_patients_antigenCovit, {'RESULTADO':np_NaN}, "Antígeno SARS CoV-2", "_antigenSARS_COV2", day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], day_, codeIntCob, yymmddPath, currentPath)
+
+def antybody_excel():
+    make_excel_antigen_antibody(idx_patients_antibodyCovit, {'IgG':np_NaN, 'IgM':np_NaN}, "IgG IgM SARS CoV-2", "_antibodySARS_COV2", day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], day_, codeIntCob, yymmddPath, currentPath)
+
+def laboratory_excel():
+    make_laboratory_excel(idx_patients, idx_enterprise, codeIntLab, csvFile, ECBP_str, currentPath, yymmddPath, day_, idx_urgentes, idx_vuelo, examNameList, ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, "")
+
+def laboratoryNoCovid_excel():
+    make_no_covid_excel(idx_patients_noCovits, idx_enterprise_patients_noCovits, codeIntLab, csvFile, currentPath, os_path.join(yymmddPath,"byExamCategory"), day_, idx_urgentes, idx_vuelo, examNameList_nested, ECBP, enterpriseNames_asDict, "")
+
+def cobranza_excel():
+    make_excel_cobranza(idx_patients, codeIntCob, day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], csvFile, examNameList, ECBP_str, listEnterpriseNameByPatient, day_, currentPath,  yymmddPath, idx_urgentes)
+
+def enterprises_excel():
+
+    for codeEnterprise_ in idx_patients_enterprise_forExclusiveExcel_asDict:
+        
+        make_excel_enterprise_forExclusiveExcel(
+            idx_patients_enterprise_forExclusiveExcel_asDict[codeEnterprise_], "_{}".format(codeEnterprise_),
+            day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], day_, codeIntLab, csvFile, examNameList, currentPath, yymmddPath, idx_urgentes
+            )
+    
+def laboratory_excel_m():
+    make_laboratory_excel(idx_patients_m, idx_enterprise_m, codeIntLab_m, csvFile_m, ECBP_str_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth"), yymmddPath[7:-7], idx_urgentes_m, idx_vuelo_m, examNameList_m, ECBNC_m, ECBAC_m, ECBABC_m, ECBCABC_m, ECBSP_m, enterpriseNames_asDict_m, "")
+
+def cobranza_excel_m():
+    make_excel_cobranza(idx_patients_m, codeIntCob_m, day_list_m, csvFile_m, examNameList_m, ECBP_str_m, listEnterpriseNameByPatient_m, yymmddPath[7:-7], currentPath, os_path.join(yymmddPath[:-6],"byMonth"), idx_urgentes_m)
+        
+def antigen_excel_m():
+    make_excel_antigen_antibody(idx_patients_antigenCovit_m, {'RESULTADO':np_NaN}, "Antígeno SARS CoV-2", "_antigenSARS_COV2", day_list_antigenCovit_m, yymmddPath[7:-7], codeIntCob_m, os_path.join(yymmddPath[:-6],"byMonth"), currentPath)
+
+def antybody_excel_m():
+    make_excel_antigen_antibody(idx_patients_antibodyCovit_m, {'IgG':np_NaN, 'IgM':np_NaN}, "IgG IgM SARS CoV-2", "_antibodySARS_COV2", day_list_antibodyCovit_m, yymmddPath[7:-7], codeIntCob_m, os_path.join(yymmddPath[:-6],"byMonth"), currentPath)
+
+def laboratoryNoCovid_excel_m():
+    make_no_covid_excel(idx_patients_noCovits_m, idx_enterprise_patients_noCovits_m, codeIntLab_m, csvFile_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth","byExamCategory"), yymmddPath[7:-7], idx_urgentes_m, idx_vuelo_m, examNameList_nested_m, ECBP_m, enterpriseNames_asDict_m, "_NoCovid")
+
+def enterprises_excel_m():
+
+    for codeEnterprise_ in idx_patients_enterprise_forExclusiveExcel_asDict_m:
+        
+        make_excel_enterprise_forExclusiveExcel(
+            idx_patients_enterprise_forExclusiveExcel_asDict_m[codeEnterprise_], "_{}".format(codeEnterprise_),
+            day_list_enterprises_excel_m[codeEnterprise_], yymmddPath[7:-7], codeIntLab_m, csvFile_m, examNameList_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth"),
+            idx_urgentes_m)
+
+    
+
+
+

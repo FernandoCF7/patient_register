@@ -1,17 +1,22 @@
- import settings
-import gime
+import pandas as pd
+orig_url = 'https://github.com/FernandoCF7/denatbioRegistroPacientes/blob/main/'
+filePath_listExam = ("{0}"+"listadoDeExamenes/listExam.csv?raw=true").format(orig_url)
+pd_listExam = (pd.read_csv(filePath_listExam, usecols=["COD INT", "EXAMEN"]))
+
+import settings
 
 #-----------------------------------------------------------------------------#
+#set parameters to make excel files
 day = '080123'
 
-#list to generate the excel file by enterprise
-exel_enterprises = ['/particular/']#_allarrived_
+#list to generate the excel file by enterprise; Note _allarrived_ makes for all registered enterprises
+exel_enterprises = ['/particular/']
 
 #set subsidiary
 subsidiary = '01'#hermita
 
 #inline excell files
-inlineEF = True
+inlineEF = False
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#

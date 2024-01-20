@@ -1,5 +1,6 @@
 from pandas import read_csv as pd_read_csv, concat as pd_concat, isnull as pd_isnull, Index as pd_Index, DataFrame as pd_DataFrame, ExcelWriter as pd_ExcelWriter, Series as pd_Series
 
+
 from os import path as os_path
 from numpy import any as np_any, prod as np_prod, array as np_array, NaN as np_NaN, argwhere as np_argwhere, where as np_where
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
@@ -44,7 +45,7 @@ def set_projectmodule_parameters(currentPath, inlineEF):
 #read registro file
 def get_csvFile(currentPath, yymmddPath):
     
-    filePath_registro = os_path.join("{0}", "DB_ingresoPorVoz", "{1}.txt").format(currentPath, yymmddPath)
+    filePath_registro = os_path.join("{0}", "input_src", "{1}.txt").format(currentPath, yymmddPath)
 
     csvFile = (pd_read_csv(filePath_registro,sep='*', dtype={2: str}))
 
@@ -83,9 +84,9 @@ def set_pd_listExam(currentPath, inlineEF):
     global pd_listExam
 
     if inlineEF:
-        filePath_listExam = ("{0}"+"listadoDeExamenes/listExam.csv?raw=true").format(orig_url)
+        filePath_listExam = ("{0}"+"src_lists/exams/listExam.csv?raw=true").format(orig_url)
     else:
-        filePath_listExam = os_path.join("{0}", "..", "listadoDeExamenes", "listExam.csv").format(currentPath)
+        filePath_listExam = os_path.join("{0}", "src_lists", "exams", "listExam.csv").format(currentPath)
 
     pd_listExam = (pd_read_csv(filePath_listExam, usecols=["COD INT", "EXAMEN"]))
 
@@ -93,7 +94,7 @@ def set_pd_listExam(currentPath, inlineEF):
     pd_listExam.set_index("COD INT", inplace=True)
 
     #read listExam locally file
-    filePath_listExam_tmp = os_path.join("{}", "altas", "listExam.csv").format(currentPath)
+    filePath_listExam_tmp = os_path.join("{}", "src_lists", "altas", "listExam.csv").format(currentPath)
     listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["COD INT", "EXAMEN"])
 
     listExam_locally.set_index("COD INT", inplace=True)
@@ -113,9 +114,9 @@ def set_df_enterpriseNames(currentPath, inlineEF):
     global df_enterpriseNames
 
     if inlineEF:
-        filePath_clavesNombresEmpresa = ("{0}"+"empresas/clavesNombresEmpresa.csv?raw=true").format(orig_url)
+        filePath_clavesNombresEmpresa = ("{0}"+"src_lists/enterprise/claveEnterpriseName.csv?raw=true").format(orig_url)
     else:
-        filePath_clavesNombresEmpresa = os_path.join("{0}", "..", "empresas", "clavesNombresEmpresa.csv").format(currentPath)
+        filePath_clavesNombresEmpresa = os_path.join("{0}", "src_lists", "enterprise", "claveEnterpriseName.csv").format(currentPath)
 
     df_enterpriseNames = pd_read_csv(filePath_clavesNombresEmpresa, keep_default_na=False)
 
@@ -123,7 +124,7 @@ def set_df_enterpriseNames(currentPath, inlineEF):
     df_enterpriseNames.set_index("clave", inplace=True)
 
     #read clavesNombresEmpresa locally file
-    filePath_clavesNombresEmpresa_tmp = os_path.join("{}", "altas", "clavesNombresEmpresa.csv").format(currentPath)
+    filePath_clavesNombresEmpresa_tmp = os_path.join("{}", "src_lists", "altas", "claveEnterpriseName.csv").format(currentPath)
     clavesNombresEmpresa_locally = pd_read_csv(filePath_clavesNombresEmpresa_tmp, encoding='latin-1', keep_default_na=False)
 
     clavesNombresEmpresa_locally.set_index("clave", inplace=True)
@@ -139,9 +140,9 @@ def set_pd_listSurrogate(currentPath, inlineEF):
     global pd_listSurrogate
 
     if inlineEF:
-        filePath_list = ("{0}"+"surrogate/surrogateList.csv?raw=true").format(orig_url)
+        filePath_list = ("{0}"+"src_lists/surrogate/surrogateList.csv?raw=true").format(orig_url)
     else:
-        filePath_list = os_path.join("{0}", "..", "surrogate", "surrogateList.csv").format(currentPath)
+        filePath_list = os_path.join("{0}", "src_lists", "surrogate", "surrogateList.csv").format(currentPath)
 
     pd_listSurrogate = (pd_read_csv(filePath_list, usecols=["CODIGO", "NOMBRE"]))
 
@@ -149,7 +150,7 @@ def set_pd_listSurrogate(currentPath, inlineEF):
     pd_listSurrogate.set_index("CODIGO", inplace=True)
 
     #read pd_listSurrogate locally file
-    filePath_list_tmp = os_path.join("{}", "altas", "surrogateList.csv").format(currentPath)
+    filePath_list_tmp = os_path.join("{}", "src_lists", "altas", "surrogateList.csv").format(currentPath)
     list_locally = pd_read_csv(filePath_list_tmp, usecols=["CODIGO", "NOMBRE"])
 
     list_locally.set_index("CODIGO", inplace=True)
@@ -159,11 +160,11 @@ def set_pd_listSurrogate(currentPath, inlineEF):
         
         #repeated code 
         if idx in pd_listSurrogate.index:
-            sys_exit("ERROR: EL código {} del subrrogante {} (archivo: altas/surrogate/surrogateList.csv) ya es utilizado en el listado de subrrogantes del sistema; asocie un código distinto".format(idx, row.NOMBRE))
+            sys_exit("ERROR: EL código {} del subrrogante {} (archivo: src_lists/altas/surrogate/surrogateList.csv) ya es utilizado en el listado de subrrogantes del sistema; asocie un código distinto".format(idx, row.NOMBRE))
         
         #repeated NAME
         if row.NOMBRE in list(pd_listSurrogate.NOMBRE):
-            sys_exit("ERROR: EL subrrogante {} con código {} (archivo: altas/surrogate/surrogateList.csv) ya está en el listado de subrrogantes del sistema".format(row.NOMBRE, idx))
+            sys_exit("ERROR: EL subrrogante {} con código {} (archivo: src_lists/altas/surrogate/surrogateList.csv) ya está en el listado de subrrogantes del sistema".format(row.NOMBRE, idx))
 
     #append
     pd_listSurrogate = pd_concat([pd_listSurrogate, list_locally])
@@ -297,9 +298,9 @@ def set_codeEnterpriseFile(currentPath, inlineEF):
     #codeEnterpriseFile --> pd data frame, /empresa/ CODE
 
     if inlineEF:
-        filePath_codeEnterprise = ("{0}"+"empresas/codeEnterprise.csv?raw=true").format(orig_url)
+        filePath_codeEnterprise = ("{0}"+"src_lists/enterprise/codeEnterprise.csv?raw=true").format(orig_url)
     else:
-        filePath_codeEnterprise = os_path.join("{0}", "..", "empresas", "codeEnterprise.csv").format(currentPath)
+        filePath_codeEnterprise = os_path.join("{0}", "src_lists", "enterprise", "codeEnterprise.csv").format(currentPath)
 
     codeEnterpriseFile = pd_read_csv(filePath_codeEnterprise, encoding='latin-1', keep_default_na=False)
 
@@ -310,7 +311,7 @@ def set_codeEnterpriseFile(currentPath, inlineEF):
     codeEnterpriseFile["empresa"] = codeEnterpriseFile["empresa"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
     #read codeEnterprise locally file
-    filePath_codeEnterprise_tmp = os_path.join("{}", "altas", "codeEnterprise.csv").format(currentPath)
+    filePath_codeEnterprise_tmp = os_path.join("{}", "src_lists", "altas", "codeEnterprise.csv").format(currentPath)
 
     codeEnterpriseFile_locally = pd_read_csv(filePath_codeEnterprise_tmp, encoding='latin-1', keep_default_na=False)
 
@@ -804,7 +805,7 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}","listadosGeneradosParaExel","{1}", "{2}{3}.xlsx").format(currentPath, yymmddPath,day,path_)
+    pathTosave = os_path.join("{0}","output_src","{1}", "{2}{3}.xlsx").format(currentPath, yymmddPath,day,path_)
 
     with pd_ExcelWriter(pathTosave, engine='xlsxwriter') as writer:
                                                            
@@ -950,7 +951,21 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-def make_no_covid_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, currentPath, yymmddPath, day, idx_urgentes, idx_vuelo, examNameList_nested, ECBP, enterpriseNames_asDict, path_=""):
+def make_no_covid_excel(
+            idx_patients_,
+            idx_enterprise_,
+            codeIntLab,
+            csvFile,
+            currentPath,
+            yymmddPath,
+            day,
+            idx_urgentes,
+            idx_vuelo,
+            examNameList_nested,
+            ECBP,
+            enterpriseNames_asDict,
+            path_=""
+        ):
 
     #idx_patients_ --> pandas index, the index (in the CSV file) of patients to show
     #idx_enterprise --> list, the index (in the CSV file) of enterprises to show
@@ -1079,7 +1094,7 @@ def make_no_covid_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, cur
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}", "listadosGeneradosParaExel", "{1}", "{2}{3}.xlsx").format(currentPath, yymmddPath, day, path_)
+    pathTosave = os_path.join("{0}", "output_src", "{1}", "{2}{3}.xlsx").format(currentPath, yymmddPath, day, path_)
 
     with pd_ExcelWriter(pathTosave, engine='xlsxwriter') as writer:
                                                            
@@ -1230,7 +1245,7 @@ def make_excel_antigen_antibody(idx_patients_, resultadoColumn, exam, path_, day
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}", "..", "..", "listadosGeneradosParaExel", "{1}", "byExamCategory", "{2}_{3}.xlsx").format(currentPath, yymmddPath,day_to_save,path_)
+    pathTosave = os_path.join("{0}", "..", "..", "output_src", "{1}", "byExamCategory", "{2}_{3}.xlsx").format(currentPath, yymmddPath,day_to_save,path_)
 
     with pd_ExcelWriter(pathTosave, engine='xlsxwriter') as writer:
 
@@ -1290,7 +1305,7 @@ def make_excel_enterprise_forExclusiveExcel(idx_patients_, path_, day, day_to_sa
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}", "..", "..", "listadosGeneradosParaExel", "{1}","byEnterprise", "{2}{3}.xlsx").format(currentPath, yymmddPath,day_to_save,path_)
+    pathTosave = os_path.join("{0}", "..", "..", "output_src", "{1}","byEnterprise", "{2}{3}.xlsx").format(currentPath, yymmddPath,day_to_save,path_)
 
     with pd_ExcelWriter(pathTosave, engine='xlsxwriter') as writer:
 
@@ -1366,7 +1381,7 @@ def make_excel_cobranza(idx_patients_, codeIntCob, day, csvFile, examNameList, E
 
 
     #----------------------------------------------------------------------------#
-    pathTosave = os_path.join("{0}", "..", "..", "listadosGeneradosParaExel", "{1}", "{2}_cobranza.xlsx").format(currentPath, yymmddPath,day_to_save)
+    pathTosave = os_path.join("{0}", "..", "..", "output_src", "{1}", "{2}_cobranza.xlsx").format(currentPath, yymmddPath,day_to_save)
 
     with pd_ExcelWriter(pathTosave, engine='xlsxwriter') as writer:
 

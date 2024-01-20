@@ -2,3 +2,22 @@
 __pycache__/
 
 /code/env
+/code/garbage
+
+/code/output_src/____23/*
+!/code/output_src/____23/**/.gitkeep
+/code/output_src/____24/*
+!/code/output_src/____24/**/.gitkeep
+/code/output_src/____25/*
+!/code/output_src/____25/**/.gitkeep
+/code/output_src/____26/*
+!/code/output_src/____26/**/.gitkeep
+
+/code/input_src/____23/*
+!/code/input_src/____23/**/.gitkeep
+/code/input_src/____24/*
+!/code/input_src/____24/**/.gitkeep
+/code/input_src/____25/*
+!/code/input_src/____25/**/.gitkeep
+/code/input_src/____26/*
+!/code/input_src/____26/**/.gitkeep

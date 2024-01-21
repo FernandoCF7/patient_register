@@ -1,6 +1,18 @@
 # patient_register
 
-## **This project contains a python sofware to load and generate excel list (reports) of the patient laboratory register proccess**
+> ## **This project contains a python sofware to load and generate excel list (reports) of the patient laboratory register proccess**
+> - #### Patient laboratory register
+> - #### Python
+
+The software is designed to manage and efficiently the patient register and laboratory process to them. The image below shows how the software works.
+
+
+
+
+--> como dar de alta:
+    empresas
+    examenes
+    surrogadores
 
 objetivo (para que sirve)
 1) como llenar

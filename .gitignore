@@ -4,6 +4,8 @@ __pycache__/
 /code/env
 /code/garbage
 
+/important_but_not_to_send_to_github
+
 /code/output_src/____23/*
 !/code/output_src/____23/**/.gitkeep
 /code/output_src/____24/*

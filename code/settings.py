@@ -88,21 +88,21 @@ def set_pd_listExam(currentPath, inlineEF):
     else:
         filePath_listExam = os_path.join("{0}", "src_lists", "exams", "listExam.csv").format(currentPath)
 
-    pd_listExam = (pd_read_csv(filePath_listExam, usecols=["COD INT", "EXAMEN"]))
+    pd_listExam = (pd_read_csv(filePath_listExam, usecols=["NUMERIC CODE", "SHORT EXAMN NAME"]))
 
-    #set index of pd_listExam as COD INT column
-    pd_listExam.set_index("COD INT", inplace=True)
+    #set index of pd_listExam as NUMERIC CODE column
+    pd_listExam.set_index("NUMERIC CODE", inplace=True)
 
     #read listExam locally file
-    filePath_listExam_tmp = os_path.join("{}", "src_lists", "altas", "listExam.csv").format(currentPath)
-    listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["COD INT", "EXAMEN"])
+    filePath_listExam_tmp = os_path.join("{}", "src_lists", "dischargeWhenOffline", "listExam.csv").format(currentPath)
+    listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["NUMERIC CODE", "SHORT EXAMN NAME"])
 
-    listExam_locally.set_index("COD INT", inplace=True)
+    listExam_locally.set_index("NUMERIC CODE", inplace=True)
 
     # append listExam_locally to pd_listExam
     for idx, row in listExam_locally.iterrows():
         if idx in pd_listExam.index:#update the Exam
-            pd_listExam.EXAMEN[idx] = row["EXAMEN"]
+            pd_listExam.EXAMEN[idx] = row["SHORT EXAMN NAME"]
         # else:#append examn
         #     pd_listExam = pd_concat([pd_listExam, listExam_locally.loc[idx]], axis=0)
 #-----------------------------------------------------------------------------#
@@ -124,7 +124,7 @@ def set_df_enterpriseNames(currentPath, inlineEF):
     df_enterpriseNames.set_index("clave", inplace=True)
 
     #read clavesNombresEmpresa locally file
-    filePath_clavesNombresEmpresa_tmp = os_path.join("{}", "src_lists", "altas", "claveEnterpriseName.csv").format(currentPath)
+    filePath_clavesNombresEmpresa_tmp = os_path.join("{}", "src_lists", "dischargeWhenOffline", "claveEnterpriseName.csv").format(currentPath)
     clavesNombresEmpresa_locally = pd_read_csv(filePath_clavesNombresEmpresa_tmp, encoding='latin-1', keep_default_na=False)
 
     clavesNombresEmpresa_locally.set_index("clave", inplace=True)
@@ -144,14 +144,14 @@ def set_pd_listSurrogate(currentPath, inlineEF):
     else:
         filePath_list = os_path.join("{0}", "src_lists", "surrogate", "surrogateList.csv").format(currentPath)
 
-    pd_listSurrogate = (pd_read_csv(filePath_list, usecols=["CODIGO", "NOMBRE"]))
+    pd_listSurrogate = (pd_read_csv(filePath_list, usecols=["CODIGO", "NAME"]))
 
     #set index of pd_listSurrogate as CODE column
     pd_listSurrogate.set_index("CODIGO", inplace=True)
 
     #read pd_listSurrogate locally file
-    filePath_list_tmp = os_path.join("{}", "src_lists", "altas", "surrogateList.csv").format(currentPath)
-    list_locally = pd_read_csv(filePath_list_tmp, usecols=["CODIGO", "NOMBRE"])
+    filePath_list_tmp = os_path.join("{}", "src_lists", "dischargeWhenOffline", "surrogateList.csv").format(currentPath)
+    list_locally = pd_read_csv(filePath_list_tmp, usecols=["CODIGO", "NAME"])
 
     list_locally.set_index("CODIGO", inplace=True)
     
@@ -160,11 +160,11 @@ def set_pd_listSurrogate(currentPath, inlineEF):
         
         #repeated code 
         if idx in pd_listSurrogate.index:
-            sys_exit("ERROR: EL código {} del subrrogante {} (archivo: src_lists/altas/surrogate/surrogateList.csv) ya es utilizado en el listado de subrrogantes del sistema; asocie un código distinto".format(idx, row.NOMBRE))
+            sys_exit("ERROR: EL código {} del subrrogante {} (archivo: src_lists/dischargeWhenOffline/surrogate/surrogateList.csv) ya es utilizado en el listado de subrrogantes del sistema; asocie un código distinto".format(idx, row.NAME))
         
         #repeated NAME
-        if row.NOMBRE in list(pd_listSurrogate.NOMBRE):
-            sys_exit("ERROR: EL subrrogante {} con código {} (archivo: src_lists/altas/surrogate/surrogateList.csv) ya está en el listado de subrrogantes del sistema".format(row.NOMBRE, idx))
+        if row.NAME in list(pd_listSurrogate.NAME):
+            sys_exit("ERROR: EL subrrogante {} con código {} (archivo: src_lists/dischargeWhenOffline/surrogate/surrogateList.csv) ya está en el listado de subrrogantes del sistema".format(row.NAME, idx))
 
     #append
     pd_listSurrogate = pd_concat([pd_listSurrogate, list_locally])
@@ -179,8 +179,8 @@ def get_idx_enterprise(csvFile_firstName):
 
     for idx, val in enumerate(csvFile_firstName):#for each field
         
-        #search for "EMPRESA" word
-        if val.find("EMPRESA") != -1:
+        #search for "ENTERPRISE" word
+        if val.find("ENTERPRISE") != -1:
             idx_enterprise.append(idx)
 
     return idx_enterprise
@@ -217,7 +217,7 @@ def get_enterpriseNames(OSR, csvFile, idx_enterprise, day):
         enterprise_name = patern.search(csvFile["firstName"][val]).group()
         
         #search enterprise_name in codeEnterpriseFile
-        logicTMP = enterprise_name == codeEnterpriseFile['empresa'].str.upper()
+        logicTMP = enterprise_name == codeEnterpriseFile['enterprise'].str.upper()
         
         #not defined enterprise mesage error
         if not(any(logicTMP)):
@@ -237,6 +237,7 @@ def get_enterpriseNames(OSR, csvFile, idx_enterprise, day):
         enterpriseCodecs.append(enterprise_code)
         
         #append enterprise_code
+        print(df_enterpriseNames.loc[enterprise_code])
         enterpriseNames.append(df_enterpriseNames.loc[enterprise_code].item())
 
     return enterpriseNames, enterpriseCodecs
@@ -265,7 +266,7 @@ def get_enterpriseNames_exclusiveExcel(exel_enterprises, day):
         enterprise_name = enterprise_name.replace("@@", "Ñ")
         
         #search enterprise_name in codeEnterpriseFile
-        logicTMP = enterprise_name == codeEnterpriseFile['empresa'].str.upper()
+        logicTMP = enterprise_name == codeEnterpriseFile['enterprise'].str.upper()
         
         #not defined enterprise mesage error
         if not(any(logicTMP)):
@@ -305,21 +306,21 @@ def set_codeEnterpriseFile(currentPath, inlineEF):
     codeEnterpriseFile = pd_read_csv(filePath_codeEnterprise, encoding='latin-1', keep_default_na=False)
 
     #set as upper
-    codeEnterpriseFile["empresa"] = codeEnterpriseFile["empresa"].str.upper()
+    codeEnterpriseFile["enterprise"] = codeEnterpriseFile["enterprise"].str.upper()
 
     #remove acents
-    codeEnterpriseFile["empresa"] = codeEnterpriseFile["empresa"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+    codeEnterpriseFile["enterprise"] = codeEnterpriseFile["enterprise"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
     #read codeEnterprise locally file
-    filePath_codeEnterprise_tmp = os_path.join("{}", "src_lists", "altas", "codeEnterprise.csv").format(currentPath)
+    filePath_codeEnterprise_tmp = os_path.join("{}", "src_lists", "dischargeWhenOffline", "codeEnterprise.csv").format(currentPath)
 
     codeEnterpriseFile_locally = pd_read_csv(filePath_codeEnterprise_tmp, encoding='latin-1', keep_default_na=False)
 
     #set as upper
-    codeEnterpriseFile_locally["empresa"] = codeEnterpriseFile_locally["empresa"].str.upper()
+    codeEnterpriseFile_locally["enterprise"] = codeEnterpriseFile_locally["enterprise"].str.upper()
 
     #remove acents
-    codeEnterpriseFile_locally["empresa"]=codeEnterpriseFile_locally["empresa"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+    codeEnterpriseFile_locally["enterprise"]=codeEnterpriseFile_locally["enterprise"].str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
     #Concatenated codeEnterpriseFile and codeEnterpriseFile_locally
     codeEnterpriseFile = pd_concat([codeEnterpriseFile, codeEnterpriseFile_locally], axis=0)

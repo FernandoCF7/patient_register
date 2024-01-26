@@ -77,7 +77,13 @@ patient5 name* patient5 lastname* 003
 
 ```
 
-se puede cargar como 3 o 003
-los espacios los ignora el sistema (por claridad yo los pongo como patient1 name* patient1 lastname* 003)
-the * separates columns
+**Notes:**
+
+    - The first row allways would be 'firstName*SecondName*thirdName'
+    - Uses the asterisk symbol '*' to separete the info at three columns
+    - The second line begins with 'enterprise', it delimites a patient group requirement
+    - The last number of the 'enterprise' lines is used to identify the patient group requirement sheet; it can be used any number
+    - You can set the exam code as simple integer (example: 1) or as a padding zero number (example: 001)
+    - The blank space into '*'s are ignored; i.e. is the same: 'name1*lastname1','name1 * lastname1', 'name1* lastname1', 'name1 *lastname1', etc.
+
 4) saca listados por dia, por mes y por empresa 

@@ -1,16 +1,16 @@
-import pandas as pd
-orig_url = 'https://github.com/FernandoCF7/denatbioRegistroPacientes/blob/main/'
-filePath_listExam = ("{0}"+"listadoDeExamenes/listExam.csv?raw=true").format(orig_url)
-pd_listExam = (pd.read_csv(filePath_listExam, usecols=["COD INT", "EXAMEN"]))
+#import pandas as pd
+#orig_url = 'https://github.com/FernandoCF7/denatbioRegistroPacientes/blob/main/'
+#filePath_listExam = ("{0}"+"listadoDeExamenes/listExam.csv?raw=true").format(orig_url)
+#pd_listExam = (pd.read_csv(filePath_listExam, usecols=["COD INT", "EXAMEN"]))
 
 import settings
 
 #-----------------------------------------------------------------------------#
 #set parameters to make excel files
-day = '080123'
+day = '070123'
 
 #list to generate the excel file by enterprise; Note _allarrived_ makes for all registered enterprises
-exel_enterprises = ['/particular/']
+exel_enterprises = ['/WONKA CHOCOLATE/']
 
 #set subsidiary
 subsidiary = '01'#hermita

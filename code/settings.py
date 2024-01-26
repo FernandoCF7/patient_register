@@ -88,21 +88,21 @@ def set_pd_listExam(currentPath, inlineEF):
     else:
         filePath_listExam = os_path.join("{0}", "src_lists", "exams", "listExam.csv").format(currentPath)
 
-    pd_listExam = (pd_read_csv(filePath_listExam, usecols=["NUMERIC CODE", "SHORT EXAMN NAME"]))
+    pd_listExam = (pd_read_csv(filePath_listExam, usecols=["NUMERIC_CODE", "SHORT_EXAMN_NAME"]))
 
-    #set index of pd_listExam as NUMERIC CODE column
-    pd_listExam.set_index("NUMERIC CODE", inplace=True)
+    #set index of pd_listExam as NUMERIC_CODE column
+    pd_listExam.set_index("NUMERIC_CODE", inplace=True)
 
     #read listExam locally file
     filePath_listExam_tmp = os_path.join("{}", "src_lists", "dischargeWhenOffline", "listExam.csv").format(currentPath)
-    listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["NUMERIC CODE", "SHORT EXAMN NAME"])
+    listExam_locally = pd_read_csv(filePath_listExam_tmp, usecols=["NUMERIC_CODE", "SHORT_EXAMN_NAME"])
 
-    listExam_locally.set_index("NUMERIC CODE", inplace=True)
+    listExam_locally.set_index("NUMERIC_CODE", inplace=True)
 
     # append listExam_locally to pd_listExam
     for idx, row in listExam_locally.iterrows():
         if idx in pd_listExam.index:#update the Exam
-            pd_listExam.EXAMEN[idx] = row["SHORT EXAMN NAME"]
+            pd_listExam.EXAMEN[idx] = row["SHORT_EXAMN_NAME"]
         # else:#append examn
         #     pd_listExam = pd_concat([pd_listExam, listExam_locally.loc[idx]], axis=0)
 #-----------------------------------------------------------------------------#
@@ -237,7 +237,6 @@ def get_enterpriseNames(OSR, csvFile, idx_enterprise, day):
         enterpriseCodecs.append(enterprise_code)
         
         #append enterprise_code
-        print(df_enterpriseNames.loc[enterprise_code])
         enterpriseNames.append(df_enterpriseNames.loc[enterprise_code].item())
 
     return enterpriseNames, enterpriseCodecs
@@ -428,29 +427,29 @@ def get_listShiftByPatient(idx_enterprise, idx_patients, shift, len_csvFile):
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#search for 'urgents' examns
-def get_idx_urgentes(idx_patients, csvFile):
+#search for 'express' examns
+def get_idx_express(idx_patients, csvFile):
 
-    patern_urgente = re_compile(r'URGENTE', flags=re_IGNORECASE)#'URGENTE' pattern
+    patern_express = re_compile(r'EXPRESS', flags=re_IGNORECASE)#'EXPRESS' pattern
     
-    idx_urgentes = []
+    idx_express = []
 
     for val in idx_patients:#search for each patient
         
         #csvFile.firstName --> patient name
         patientName = csvFile.firstName[val]
 
-        if patientName.find("URGENTE")!=-1:#finded 'URGENTE' inside the patient name
-            idx_urgentes.append(val)
+        if patientName.find("EXPRESS")!=-1:#finded 'EXPRESS' inside the patient name
+            idx_express.append(val)
     
-    return idx_urgentes
+    return idx_express
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
 #search for vuelo examns
 def get_idx_vuelo(idx_patients, csvFile):
 
-    patern_vuelo = re_compile(r'VUELO', flags=re_IGNORECASE)#'VUELO' pattern
+    patern_vuelo = re_compile(r'FLIGHT', flags=re_IGNORECASE)#'FLIGHT' pattern
     
     idx_vuelo = []
 
@@ -458,17 +457,17 @@ def get_idx_vuelo(idx_patients, csvFile):
         
         #csvFile.firstName --> patient name
         patientName = csvFile.firstName[val]
-        if patientName.find("VUELO")!=-1:#finded 'VUELO' in the patient name
+        if patientName.find("FLIGHT")!=-1:#finded 'FLIGHT' in the patient name
             idx_vuelo.append(val)
 
     return idx_vuelo
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#csvFile.firstName --> cut the 'VUELO' part
+#csvFile.firstName --> cut the 'FLIGHT' part
 def update_csvFile_firstName_vuelo(idx_vuelo, csvFile):
 
-    patern_vuelo = re_compile(r'VUELO', flags=re_IGNORECASE)#'VUELO' pattern
+    patern_vuelo = re_compile(r'FLIGHT', flags=re_IGNORECASE)#'FLIGHT' pattern
     
     for val in idx_vuelo:
         
@@ -528,16 +527,16 @@ def get_ECBP(idx_patients, csvFile):
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-#update csvFile.firstName cuting the 'URGENTE' part
-def update_csvFile_firstName_urgent(idx_urgentes, csvFile):
+#update csvFile.firstName cuting the 'EXPRESS' part
+def update_csvFile_firstName_express(idx_express, csvFile):
 
-    patern_urgente = re_compile(r'URGENTE', flags=re_IGNORECASE)#'URGENTE' pattern
+    patern_express = re_compile(r'EXPRESS', flags=re_IGNORECASE)#'EXPRESS' pattern
     
-    for val in idx_urgentes:
+    for val in idx_express:
         
         patientName = csvFile.firstName[val]
 
-        tmp = patern_urgente.search(patientName)
+        tmp = patern_express.search(patientName)
         csvFile.firstName[val] = patientName[0:tmp.start()]+patientName[tmp.end():]
 #-----------------------------------------------------------------------------#
 
@@ -616,7 +615,7 @@ def get_examNameList(idx_patients, csvFile, ECBP, format_, day):
         
         #ensure exams code are recored
         try:
-            examsName = pd_listExam.EXAMEN[list((ECBP[val]).keys())].tolist()
+            examsName = pd_listExam.SHORT_EXAMN_NAME[list((ECBP[val]).keys())].tolist()
         except KeyError:
             print(CEND.format(day, csvFile.firstName[val], csvFile.secondName.iloc[val]))        
             sys_exit()
@@ -638,14 +637,14 @@ def get_examNameList(idx_patients, csvFile, ECBP, format_, day):
 
 #-----------------------------------------------------------------------------#
 #make internal code
-def get_codeInt_Lab_Cob(idx_patients, idx_urgentes, day, subsidiary, ECBP, listEnterpriseCodeByPatient, listShiftByPatient, EPCBP):
+def get_codeInt_Lab_Cob(idx_patients, idx_express, day, subsidiary, ECBP, listEnterpriseCodeByPatient, listShiftByPatient, EPCBP):
 
     codeIntLab = dict()
     codeIntCob = dict()
     
     for idx, val in enumerate(idx_patients):
 
-        urgent = "U" if val in idx_urgentes else "N"
+        express = "U" if val in idx_express else "N"
         
         codeIntCob[val] = day+'-'+subsidiary+'-'+str(idx+1).zfill(3)
         
@@ -654,7 +653,7 @@ def get_codeInt_Lab_Cob(idx_patients, idx_urgentes, day, subsidiary, ECBP, listE
         if not [i for i in [2, 487, 491, 492, 569, 1009] if  i in list((ECBP[val]).keys())]:
             examCovid = "O"
         
-        codeIntLab[val] = day+'-'+subsidiary+'-'+str(idx+1).zfill(3)+urgent+examCovid+listEnterpriseCodeByPatient[val]+listShiftByPatient[val]+"P"+str(EPCBP[val]).zfill(5)
+        codeIntLab[val] = day+'-'+subsidiary+'-'+str(idx+1).zfill(3)+express+examCovid+listEnterpriseCodeByPatient[val]+listShiftByPatient[val]+"P"+str(EPCBP[val]).zfill(5)
         
     return codeIntLab, codeIntCob
 #-----------------------------------------------------------------------------#
@@ -770,7 +769,7 @@ def delete_multiple_element(list_object, indices):
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, ECBP_str, currentPath, yymmddPath, day, idx_urgentes, idx_vuelo, examNameList, ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, path_=""):
+def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, ECBP_str, currentPath, yymmddPath, day, idx_express, idx_vuelo, examNameList, ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, path_=""):
     #idx_patients_ --> pandas index, the index (in the CSV file) of patients to show
     #idx_enterprise --> list, the index (in the CSV file) of enterprises to show
 
@@ -831,10 +830,10 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
         #-----------------------------------------------------------------------------#
     
         #-----------------------------------------------------------------------------#
-        #Set urgents format
+        #Set express format
         
-        #urgentes
-        urgentFormat = workbook.add_format(
+        #express
+        expressFormat = workbook.add_format(
             {
                 'align': 'left',
                 'valign': 'vcenter',
@@ -844,15 +843,15 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
             }
         )
     
-        for tmp in list(set(idx_urgentes) & set(idx_patients_.tolist())):
+        for tmp in list(set(idx_express) & set(idx_patients_.tolist())):
             tmp_ = idx.index(tmp)
-            worksheet.write_string('G'+str(tmp_+2)+':G'+str(tmp_+2), "URGENTE", urgentFormat)
+            worksheet.write_string('G'+str(tmp_+2)+':G'+str(tmp_+2), "EXPRESS", expressFormat)
         #-----------------------------------------------------------------------------#
     
         #-----------------------------------------------------------------------------#
         #Set vuelo format
         
-        #urgentes
+        #express
         vueloFormat = workbook.add_format(
             {
                 'align': 'left',
@@ -865,7 +864,7 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
         
         for tmp in  list(set(idx_vuelo) & set(idx_patients_.tolist())):
             tmp_ = idx.index(tmp)
-            worksheet.write_string('H'+str(tmp_+2)+':H'+str(tmp_+2), "VUELO", vueloFormat)
+            worksheet.write_string('H'+str(tmp_+2)+':H'+str(tmp_+2), "FLIGHT", vueloFormat)
         #-----------------------------------------------------------------------------#
     
         #-----------------------------------------------------------------------------#
@@ -960,7 +959,7 @@ def make_no_covid_excel(
             currentPath,
             yymmddPath,
             day,
-            idx_urgentes,
+            idx_express,
             idx_vuelo,
             examNameList_nested,
             ECBP,
@@ -1162,10 +1161,10 @@ def make_no_covid_excel(
         #-----------------------------------------------------------------------------#
     
         #-----------------------------------------------------------------------------#
-        #Set urgents and vuelo format
+        #Set express and vuelo format
         
-        #urgentes
-        urgentFormat = workbook.add_format(
+        #express
+        expressFormat = workbook.add_format(
             {
                 'align': 'left',
                 'valign': 'vcenter',
@@ -1175,9 +1174,9 @@ def make_no_covid_excel(
             }
         )
     
-        for tmp in list(set(idx_urgentes) & set(idx_patients_)):
+        for tmp in list(set(idx_express) & set(idx_patients_)):
             tmp_ = excelIdx_pdIndx[tmp] 
-            worksheet.write_string('G'+str(tmp_+2+4)+':G'+str(tmp_+2+4), "URGENTE", urgentFormat)
+            worksheet.write_string('G'+str(tmp_+2+4)+':G'+str(tmp_+2+4), "EXPRESS", expressFormat)
         
         #vuelo
         vueloFormat = workbook.add_format(
@@ -1192,7 +1191,7 @@ def make_no_covid_excel(
         
         for tmp in list(set(idx_vuelo) & set(idx_patients_)):
             tmp_ = excelIdx_pdIndx[tmp] 
-            worksheet.write_string('H'+str(tmp_+2+4)+':H'+str(tmp_+2+4), "VUELO", vueloFormat)
+            worksheet.write_string('H'+str(tmp_+2+4)+':H'+str(tmp_+2+4), "FLIGHT", vueloFormat)
         #-----------------------------------------------------------------------------#
     
         #-----------------------------------------------------------------------------#
@@ -1290,7 +1289,7 @@ def make_excel_antigen_antibody(idx_patients_, resultadoColumn, exam, path_, day
 #-----------------------------------------------------------------------------#
 
 #-----------------------------------------------------------------------------#
-def make_excel_enterprise_forExclusiveExcel(idx_patients_, path_, day, day_to_save, codeIntLab, csvFile, examNameList, currentPath, yymmddPath, idx_urgentes):
+def make_excel_enterprise_forExclusiveExcel(idx_patients_, path_, day, day_to_save, codeIntLab, csvFile, examNameList, currentPath, yymmddPath, idx_express):
 
     #----------------------------------------------------------------------------#
     #Export to excel-->antigen and antybody
@@ -1332,10 +1331,10 @@ def make_excel_enterprise_forExclusiveExcel(idx_patients_, path_, day, day_to_sa
         #-----------------------------------------------------------------------------#
         
         #-----------------------------------------------------------------------------#
-        #Set urgents format
+        #Set express format
         
-        #urgentes
-        urgentFormat = workbook.add_format(
+        #express
+        expressFormat = workbook.add_format(
             {
                 'align': 'left',
                 'valign': 'vcenter',
@@ -1347,9 +1346,9 @@ def make_excel_enterprise_forExclusiveExcel(idx_patients_, path_, day, day_to_sa
     
         idx = idx_patients_.tolist()
         idx.sort()
-        for tmp in list(set(idx_urgentes) & set(idx_patients_.tolist())):
+        for tmp in list(set(idx_express) & set(idx_patients_.tolist())):
             tmp_ = idx.index(tmp)
-            worksheet.write_string('E'+str(tmp_+2)+':E'+str(tmp_+2), "URGENTE", urgentFormat)
+            worksheet.write_string('E'+str(tmp_+2)+':E'+str(tmp_+2), "EXPRESS", expressFormat)
         #-----------------------------------------------------------------------------#
 
         #-----------------------------------------------------------------------------#
@@ -1363,7 +1362,7 @@ def make_excel_enterprise_forExclusiveExcel(idx_patients_, path_, day, day_to_sa
 
 #----------------------------------------------------------------------------#
 #excel-->cobranza
-def make_excel_cobranza(idx_patients_, codeIntCob, day, csvFile, examNameList, ECBP_str, listEnterpriseNameByPatient, day_to_save, currentPath, yymmddPath, idx_urgentes):
+def make_excel_cobranza(idx_patients_, codeIntCob, day, csvFile, examNameList, ECBP_str, listEnterpriseNameByPatient, day_to_save, currentPath, yymmddPath, idx_express):
     
     df_toExcel = pd_DataFrame(
         {
@@ -1397,8 +1396,8 @@ def make_excel_cobranza(idx_patients_, codeIntCob, day, csvFile, examNameList, E
         #-----------------------------------------------------------------------------#
         #set formats
         
-        #urgentes
-        merge_urgentFormat = workbook.add_format(
+        #express
+        merge_expressFormat = workbook.add_format(
             {
                 'align': 'left',
                 'valign': 'vcenter',
@@ -1417,14 +1416,14 @@ def make_excel_cobranza(idx_patients_, codeIntCob, day, csvFile, examNameList, E
         #-----------------------------------------------------------------------------#
         
         #-----------------------------------------------------------------------------#
-        #urgent_index
-        urgent_index=[]
-        for val in idx_urgentes:
-            urgent_index.append(np_argwhere(idx_patients_==val).item())
+        #express_index
+        express_index=[]
+        for val in idx_express:
+            express_index.append(np_argwhere(idx_patients_==val).item())
         
-        for tmp in urgent_index:
+        for tmp in express_index:
             
-            worksheet.merge_range('F'+str(tmp+2)+':G'+str(tmp+2), "URGENTE", merge_urgentFormat)
+            worksheet.merge_range('F'+str(tmp+2)+':G'+str(tmp+2), "EXPRESS", merge_expressFormat)
         #-----------------------------------------------------------------------------#
         
         #-----------------------------------------------------------------------------#
@@ -1440,9 +1439,9 @@ def make_excel_cobranza(idx_patients_, codeIntCob, day, csvFile, examNameList, E
 #-----------------------------------------------------------------------------#
 #define error mesages
 
-#Precio no definido archivo urgentes (listadoPreciosUrgent.csv)
+#Precio no definido archivo express (listadoPreciosExpress.csv)
 PNDAU="""OPERACION FALLIDA\nPrecio no definido en archivo: \
-listadoPreciosUrgent.csv para la empresa \"{0}\" con el examen \"{1}\"; \
+listadoPreciosExpress.csv para la empresa \"{0}\" con el examen \"{1}\"; \
 paciente: \"{2}\", folio de paciente: \"{3}\""""
 
 #Precio no definido archivo standar (listadoPreciosEtandar.csv)
@@ -1475,7 +1474,7 @@ currentPath = os_path.dirname(os_path.abspath(__file__))
 #get parameters from make_excel_file.py
 def set_daily_parameters(day, exel_enterprises, subsidiary, inlineEF):
     
-    global idx_patients, idx_enterprise, idx_patients_antigenCovit, idx_patients_antibodyCovit, codeIntCob, yymmddPath, codeIntLab, csvFile, ECBP, ECBP_str, idx_urgentes, idx_vuelo, examNameList, examNameList_nested, day_
+    global idx_patients, idx_enterprise, idx_patients_antigenCovit, idx_patients_antibodyCovit, codeIntCob, yymmddPath, codeIntLab, csvFile, ECBP, ECBP_str, idx_express, idx_vuelo, examNameList, examNameList_nested, day_
     global ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, idx_patients_noCovits, idx_enterprise_patients_noCovits, listEnterpriseNameByPatient, idx_patients_enterprise_forExclusiveExcel_asDict, idx_enterprise_enterprise_forExclusiveExcel_asDict
     global enterpriseNames_forExclusiveExcel, enterpriseCodecs_forExclusiveExcel
 
@@ -1532,11 +1531,11 @@ def set_daily_parameters(day, exel_enterprises, subsidiary, inlineEF):
     #set the enterprise code by patient
     listShiftByPatient = get_listShiftByPatient(idx_enterprise, idx_patients, shift, len(csvFile))
 
-    #search for urgents examns
-    idx_urgentes = get_idx_urgentes(idx_patients, csvFile)
+    #search for express examns
+    idx_express = get_idx_express(idx_patients, csvFile)
 
-    #update csvFile.firstName cuting the "urgente" part
-    update_csvFile_firstName_urgent(idx_urgentes, csvFile)
+    #update csvFile.firstName cuting the "express" part
+    update_csvFile_firstName_express(idx_express, csvFile)
 
     #search for vuelo examns
     idx_vuelo = get_idx_vuelo(idx_patients, csvFile)
@@ -1570,7 +1569,7 @@ def set_daily_parameters(day, exel_enterprises, subsidiary, inlineEF):
     examNameList_nested = get_examNameList(idx_patients, csvFile, ECBP, "as_list", day)
 
     #make inter code
-    codeIntLab, codeIntCob = get_codeInt_Lab_Cob(idx_patients, idx_urgentes, day, subsidiary, ECBP, listEnterpriseCodeByPatient, listShiftByPatient, EPCBP)
+    codeIntLab, codeIntCob = get_codeInt_Lab_Cob(idx_patients, idx_express, day, subsidiary, ECBP, listEnterpriseCodeByPatient, listShiftByPatient, EPCBP)
     
     #asociate, as dict, each patient with its corresponding enterprise
     dict_pattient_enterprise = get_dict_pattient_enterprise(idx_patients, idx_enterprise)
@@ -1595,7 +1594,7 @@ def join_month_parameters(dummy_counter):
 
         #_m --> mounth
         global idx_patients_m, idx_enterprise_m, idx_enterprise_patients_noCovits_m
-        global codeIntLab_m, csvFile_m, ECBP_str_m, idx_urgentes_m, idx_vuelo_m
+        global codeIntLab_m, csvFile_m, ECBP_str_m, idx_express_m, idx_vuelo_m
         global examNameList_m, examNameList_nested_m, ECBP_m, enterpriseNames_asDict_m
         global ECBNC_m, ECBAC_m, ECBABC_m, ECBCABC_m, ECBSP_m
         global codeIntCob_m, listEnterpriseNameByPatient_m
@@ -1612,7 +1611,7 @@ def join_month_parameters(dummy_counter):
         codeIntLab_m = {}
         csvFile_m = pd_DataFrame()
         ECBP_str_m = {}
-        idx_urgentes_m = []
+        idx_express_m = []
         idx_vuelo_m = []
         examNameList_m = {}
         examNameList_nested_m = {}
@@ -1643,7 +1642,7 @@ def join_month_parameters(dummy_counter):
     idx_patients_noCovits_m = idx_patients_noCovits_m.union(idx_patients_noCovits+dummy_counter)
     idx_enterprise_m.extend([tmp+dummy_counter for tmp in idx_enterprise])
     idx_enterprise_patients_noCovits_m.extend([tmp+dummy_counter for tmp in idx_enterprise_patients_noCovits])
-    idx_urgentes_m.extend([tmp+dummy_counter for tmp in idx_urgentes])
+    idx_express_m.extend([tmp+dummy_counter for tmp in idx_express])
     idx_vuelo_m.extend([tmp+dummy_counter for tmp in idx_vuelo])
 
     tmp = {x:day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6] for x in idx_patients}
@@ -1713,13 +1712,13 @@ def antybody_excel():
     make_excel_antigen_antibody(idx_patients_antibodyCovit, {'IgG':np_NaN, 'IgM':np_NaN}, "IgG IgM SARS CoV-2", "_antibodySARS_COV2", day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], day_, codeIntCob, yymmddPath, currentPath)
 
 def laboratory_excel():
-    make_laboratory_excel(idx_patients, idx_enterprise, codeIntLab, csvFile, ECBP_str, currentPath, yymmddPath, day_, idx_urgentes, idx_vuelo, examNameList, ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, "")
+    make_laboratory_excel(idx_patients, idx_enterprise, codeIntLab, csvFile, ECBP_str, currentPath, yymmddPath, day_, idx_express, idx_vuelo, examNameList, ECBNC, ECBAC, ECBABC, ECBCABC, ECBSP, enterpriseNames_asDict, "")
 
 def laboratoryNoCovid_excel():
-    make_no_covid_excel(idx_patients_noCovits, idx_enterprise_patients_noCovits, codeIntLab, csvFile, currentPath, os_path.join(yymmddPath,"byExamCategory"), day_, idx_urgentes, idx_vuelo, examNameList_nested, ECBP, enterpriseNames_asDict, "")
+    make_no_covid_excel(idx_patients_noCovits, idx_enterprise_patients_noCovits, codeIntLab, csvFile, currentPath, os_path.join(yymmddPath,"byExamCategory"), day_, idx_express, idx_vuelo, examNameList_nested, ECBP, enterpriseNames_asDict, "")
 
 def cobranza_excel():
-    make_excel_cobranza(idx_patients, codeIntCob, day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], csvFile, examNameList, ECBP_str, listEnterpriseNameByPatient, day_, currentPath,  yymmddPath, idx_urgentes)
+    make_excel_cobranza(idx_patients, codeIntCob, day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], csvFile, examNameList, ECBP_str, listEnterpriseNameByPatient, day_, currentPath,  yymmddPath, idx_express)
 
 def enterprises_excel():
 
@@ -1727,14 +1726,14 @@ def enterprises_excel():
         
         make_excel_enterprise_forExclusiveExcel(
             idx_patients_enterprise_forExclusiveExcel_asDict[codeEnterprise_], "_{}".format(codeEnterprise_),
-            day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], day_, codeIntLab, csvFile, examNameList, currentPath, yymmddPath, idx_urgentes
+            day_[0:2]+'/'+day_[2:4]+'/'+day_[4:6], day_, codeIntLab, csvFile, examNameList, currentPath, yymmddPath, idx_express
             )
     
 def laboratory_excel_m():
-    make_laboratory_excel(idx_patients_m, idx_enterprise_m, codeIntLab_m, csvFile_m, ECBP_str_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth"), yymmddPath[7:-7], idx_urgentes_m, idx_vuelo_m, examNameList_m, ECBNC_m, ECBAC_m, ECBABC_m, ECBCABC_m, ECBSP_m, enterpriseNames_asDict_m, "")
+    make_laboratory_excel(idx_patients_m, idx_enterprise_m, codeIntLab_m, csvFile_m, ECBP_str_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth"), yymmddPath[7:-7], idx_express_m, idx_vuelo_m, examNameList_m, ECBNC_m, ECBAC_m, ECBABC_m, ECBCABC_m, ECBSP_m, enterpriseNames_asDict_m, "")
 
 def cobranza_excel_m():
-    make_excel_cobranza(idx_patients_m, codeIntCob_m, day_list_m, csvFile_m, examNameList_m, ECBP_str_m, listEnterpriseNameByPatient_m, yymmddPath[7:-7], currentPath, os_path.join(yymmddPath[:-6],"byMonth"), idx_urgentes_m)
+    make_excel_cobranza(idx_patients_m, codeIntCob_m, day_list_m, csvFile_m, examNameList_m, ECBP_str_m, listEnterpriseNameByPatient_m, yymmddPath[7:-7], currentPath, os_path.join(yymmddPath[:-6],"byMonth"), idx_express_m)
         
 def antigen_excel_m():
     make_excel_antigen_antibody(idx_patients_antigenCovit_m, {'RESULTADO':np_NaN}, "Antígeno SARS CoV-2", "_antigenSARS_COV2", day_list_antigenCovit_m, yymmddPath[7:-7], codeIntCob_m, os_path.join(yymmddPath[:-6],"byMonth"), currentPath)
@@ -1743,7 +1742,7 @@ def antybody_excel_m():
     make_excel_antigen_antibody(idx_patients_antibodyCovit_m, {'IgG':np_NaN, 'IgM':np_NaN}, "IgG IgM SARS CoV-2", "_antibodySARS_COV2", day_list_antibodyCovit_m, yymmddPath[7:-7], codeIntCob_m, os_path.join(yymmddPath[:-6],"byMonth"), currentPath)
 
 def laboratoryNoCovid_excel_m():
-    make_no_covid_excel(idx_patients_noCovits_m, idx_enterprise_patients_noCovits_m, codeIntLab_m, csvFile_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth","byExamCategory"), yymmddPath[7:-7], idx_urgentes_m, idx_vuelo_m, examNameList_nested_m, ECBP_m, enterpriseNames_asDict_m, "_NoCovid")
+    make_no_covid_excel(idx_patients_noCovits_m, idx_enterprise_patients_noCovits_m, codeIntLab_m, csvFile_m, currentPath, os_path.join(yymmddPath[:-6],"byMonth","byExamCategory"), yymmddPath[7:-7], idx_express_m, idx_vuelo_m, examNameList_nested_m, ECBP_m, enterpriseNames_asDict_m, "_NoCovid")
 
 def enterprises_excel_m():
 
@@ -1758,5 +1757,5 @@ def enterprises_excel_m():
             examNameList_m,
             currentPath,
             os_path.join(yymmddPath[:-6],"byMonth"),
-            idx_urgentes_m
+            idx_express_m
         )

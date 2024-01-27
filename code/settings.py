@@ -15,13 +15,13 @@ from datetime import datetime
 orig_url = 'https://github.com/FernandoCF7/denatbioRegistroPacientes/blob/main/'
 
 color_by_day = {
-    0: "AMARILLO",#monday
-    1: "ROSA",#tuesday
-    2: "ANARANJADO",#wednesday
-    3: "GRIS",#thursday
-    4: "VERDE",#friday
-    5: "BLANCO",#saturday
-    6: "AZUL"#sunday
+    0: "YELLOW",#monday
+    1: "PINK",#tuesday
+    2: "ORANGE",#wednesday
+    3: "GREY",#thursday
+    4: "GREEN",#friday
+    5: "WHITE",#saturday
+    6: "BLUE"#sunday
 }
 
 #-----------------------------------------------------------------------------#
@@ -784,17 +784,17 @@ def make_laboratory_excel(idx_patients_, idx_enterprise_, codeIntLab, csvFile, E
     #Export to excel-->laboratori
     df_toExcel = pd_DataFrame(
         {
-            'OSR': np_NaN,
+            'FOLIO': np_NaN,
             'COD INT': {x:codeIntLab[x] for x in idx_patients_},
-            'NOMBRE': csvFile['firstName'][idx].str.strip(), 
-            'APELLIDO': csvFile['secondName'][idx].str.strip(),
-            'EXAMEN': {x:examNameList[x] for x in idx_patients_},
+            'NAME': csvFile['firstName'][idx].str.strip(), 
+            'LAST_NAME': csvFile['secondName'][idx].str.strip(),
+            'EXAMN': {x:examNameList[x] for x in idx_patients_},
             'COD': {x:ECBP_str[x] for x in idx_patients_},
-            'ESTATUS': np_NaN,
-            'RESULTADO': np_NaN,
-            'ENVIO': np_NaN,
-            'REVISO': np_NaN,
-            'HORA ENVIO': np_NaN
+            'STATUS': np_NaN,
+            'RESULT': np_NaN,
+            'SENDER': np_NaN,
+            'REVIEWER': np_NaN,
+            'shipping time': np_NaN
         }
     )
     #----------------------------------------------------------------------------#
@@ -1030,21 +1030,21 @@ def make_no_covid_excel(
     end_index = max( excelIdxExams_pdIndx.get(idx_patients_[-1]) )+1+4 if idx_patients_and_enterprise else 0
     df_toExcel = pd_DataFrame(
         {
-            'OSR':np_NaN,#A --> 0
+            'FOLIO':np_NaN,#A --> 0
             'COD INT':np_NaN,#B --> 1
-            'NOMBRE':np_NaN,#C --> 2
-            'APELLIDO':np_NaN,#D --> 3
-            'EXAMEN\nNOMBRE':np_NaN,#E --> 4
-            'EXAMEN\nCOD':np_NaN,#F --> 5
-            'ESTATUS':np_NaN,#G --> 6
-            'RESULTADO\nSARS CoV2':np_NaN,#H --> 7
-            'FECHA: RECEPCIÓN\nRESULTADO':np_NaN,#I --> 8
-            'ENTREGA\nRESULTADO':np_NaN,#J --> 9
-            'RECIBE\nRESULTADO':np_NaN,#K --> 10
-            'ENVIÓ':np_NaN,#L --> 11
-            'REVISÓ':np_NaN,#M --> 12
-            'FECHA DE ENVÍO':np_NaN,# --> 13
-            'HORA DE ENVÍO':np_NaN# --> 14
+            'NAME':np_NaN,#C --> 2
+            'LAST NAME':np_NaN,#D --> 3
+            'EXAMEN\nNAME':np_NaN,#E --> 4
+            'EXAMN\nCODE':np_NaN,#F --> 5
+            'STATUS':np_NaN,#G --> 6
+            'SARS CoV2\nRESULTS':np_NaN,#H --> 7
+            'DATE: RECEIPT\nRESULT':np_NaN,#I --> 8
+            'WHO GAVE\nRESULT':np_NaN,#J --> 9
+            'WHO RECIVED\nRESULT':np_NaN,#K --> 10
+            'WHO SENT\nRESULT':np_NaN,#L --> 11
+            'WHO REVIEWED\nRESULT':np_NaN,#M --> 12
+            'SHIPPING DATE':np_NaN,# --> 13
+            'SHIPPING TIME':np_NaN# --> 14
         }
         , index=range(0, end_index)
     )
@@ -1052,16 +1052,16 @@ def make_no_covid_excel(
     
     #set valus at df_toExcel
     #OSR
-    df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_enterprise_], ["OSR"]] = [csvFile["secondName"][[tmp]].str.strip() for tmp in idx_enterprise_]
+    df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_enterprise_], ["FOLIO"]] = [csvFile["secondName"][[tmp]].str.strip() for tmp in idx_enterprise_]
 
     #COD INT
     df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_patients_],"COD INT"] = [codeIntLab[tmp] for tmp in idx_patients_]
     
     #NOMBRE
-    df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_patients_], ["NOMBRE"]] = [csvFile["firstName"][[tmp]].str.strip() for tmp in idx_patients_]
+    df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_patients_], ["NAME"]] = [csvFile["firstName"][[tmp]].str.strip() for tmp in idx_patients_]
 
     #APELLIDO
-    df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_patients_], ["APELLIDO"]] = [csvFile["secondName"][[tmp]].str.strip() for tmp in idx_patients_]
+    df_toExcel.loc[[excelIdx_pdIndx[tmp]+4 for tmp in idx_patients_], ["LAST NAME"]] = [csvFile["secondName"][[tmp]].str.strip() for tmp in idx_patients_]
 
     #EXAMEN NOMBRE
     tmp_ = []
@@ -1072,7 +1072,7 @@ def make_no_covid_excel(
     for tmp in idx_patients_:
         tmp_0.extend([tmp_1+4 for tmp_1 in excelIdxExams_pdIndx[tmp]])
     
-    df_toExcel.loc[tmp_0, "EXAMEN\nNOMBRE"] = tmp_
+    df_toExcel.loc[tmp_0, "EXAMEN\nNAME"] = tmp_
 
     #EXAMEN COD
     tmp_ = []
@@ -1083,14 +1083,14 @@ def make_no_covid_excel(
     for tmp in idx_patients_:
         tmp_0.extend([tmp_1+4 for tmp_1 in excelIdxExams_pdIndx[tmp]])
     
-    df_toExcel.loc[tmp_0, "EXAMEN\nCOD"] = tmp_
+    df_toExcel.loc[tmp_0, "EXAMN\nCODE"] = tmp_
 
     #processed by (subrrogate)
     tmp_ = []
     for tmp in idx_patients_:
         tmp_.extend(list((ECBP_without_covid[tmp]).values()))
     
-    df_toExcel.loc[tmp_0, "ENTREGA\nRESULTADO"] = tmp_
+    df_toExcel.loc[tmp_0, "WHO GAVE\nRESULT"] = tmp_
     #----------------------------------------------------------------------------#
 
     #----------------------------------------------------------------------------#
@@ -1109,10 +1109,10 @@ def make_no_covid_excel(
         #-----------------------------------------------------------------------------#
         #set pre-amble
         merge_format = workbook.add_format({'align':'left', 'valign':'vcenter'})
-        worksheet.merge_range(0, 0, 0, 2, "RELACIÓN DE ÓRDENES DE SERVICIO", merge_format)
-        worksheet.merge_range(1, 0, 1, 2, "POE-34-A", merge_format)
+        worksheet.merge_range(0, 0, 0, 2, "PATIENT LIST DISCHARGE ", merge_format)
+        worksheet.merge_range(1, 0, 1, 2, "SOME ISO-CODE", merge_format)
         worksheet.merge_range(2, 0, 2, 2, "COLOR: {}".format(color_by_day[datetime.strptime(day, "%d%m%y").weekday()]), merge_format)
-        worksheet.merge_range(3, 0, 3, 2, "FECHA: {}".format(datetime.strptime(day, "%d%m%y")), merge_format)
+        worksheet.merge_range(3, 0, 3, 2, "DATE: {}".format(datetime.strptime(day, "%d%m%y")), merge_format)
         #-----------------------------------------------------------------------------#
 
         #-----------------------------------------------------------------------------#
